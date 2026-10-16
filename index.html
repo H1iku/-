@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commlink — Система управления клиентскими коммуникациями</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<base target="_blank">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">✉</div>
+        <div>
+          <div class="logo-name">Commlink</div>
+          <div class="logo-sub">клиентские коммуникации</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-link active" data-page="dashboard">📊 Дашборд</a>
+        <a href="#" class="nav-link" data-page="campaigns">📮 Рассылки</a>
+        <a href="#" class="nav-link" data-page="templates">🧩 Шаблоны</a>
+        <a href="#" class="nav-link" data-page="segments">👥 Сегменты</a>
+        <a href="#" class="nav-link" data-page="stats">📈 Статистика</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user">
+          <div class="avatar">АП</div>
+          <div>
+            <div class="user-name">Анна Петрова</div>
+            <div class="user-role">Маркетолог</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">Дашборд</h1>
+          <p class="topbar-sub" id="page-sub">Обзор всех коммуникаций за последние 30 дней</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn ghost" id="export-btn">⬇ Экспорт отчёта</button>
+          <button class="btn primary" onclick="openCampaignModal()">＋ Новая рассылка</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon blue">📮</div>
+            <div class="kpi-value" id="kpi-sent">—</div>
+            <div class="kpi-label">Отправлено писем</div>
+            <div class="kpi-delta up">▲ 12% к прошлому месяцу</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green">📈</div>
+            <div class="kpi-value" id="kpi-open">—</div>
+            <div class="kpi-label">Средний Open Rate</div>
+            <div class="kpi-delta up">▲ 1.8 п.п.</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon orange">👆</div>
+            <div class="kpi-value" id="kpi-click">—</div>
+            <div class="kpi-label">Средний CTR</div>
+            <div class="kpi-delta up">▲ 0.6 п.п.</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon purple">👥</div>
+            <div class="kpi-value" id="kpi-subs">—</div>
+            <div class="kpi-label">Активная аудитория</div>
+            <div class="kpi-delta up">▲ 340 подписчиков</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>Динамика открытий</h3>
+              <span class="badge">30 дней</span>
+            </div>
+            <canvas id="opens-chart" height="120"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Лучшие рассылки</h3>
+              <span class="badge">по open rate</span>
+            </div>
+            <div id="top-campaigns"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-campaigns">
+        <div class="card">
+          <div class="card-head">
+            <h3>Все рассылки</h3>
+            <div class="filters">
+              <button class="chip active" data-filter="all">Все</button>
+              <button class="chip" data-filter="sent">Отправлены</button>
+              <button class="chip" data-filter="draft">Черновики</button>
+              <button class="chip" data-filter="scheduled">Запланированы</button>
+            </div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>Название</th><th>Сегмент</th><th>Шаблон</th><th>Дата</th><th>Статус</th><th>Отправлено</th><th>Open Rate</th><th></th></tr>
+            </thead>
+            <tbody id="campaigns-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-templates">
+        <div class="grid-3" id="templates-grid"></div>
+      </section>
+
+      <section class="page" id="page-segments">
+        <div class="card">
+          <div class="card-head">
+            <h3>Сегменты аудитории</h3>
+            <button class="btn primary small" onclick="openSegmentModal()">＋ Новый сегмент</button>
+          </div>
+          <table class="table">
+            <thead><tr><th>Сегмент</th><th>Описание</th><th>Условия</th><th>Размер</th><th>Обновлен</th></tr></thead>
+            <tbody id="segments-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-stats">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>Открытия по дням</h3><span class="badge">14 дней</span></div>
+            <canvas id="daily-opens" height="140"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Клики / Открытия по устройствам</h3></div>
+            <canvas id="devices-chart" height="140"></canvas>
+          </div>
+        </div>
+        <div class="card" style="margin-top:24px">
+          <div class="card-head"><h3>Воронка вовлечения</h3></div>
+          <div class="funnel">
+            <div class="funnel-row"><span>Доставлено</span><div class="funnel-bar"><div style="width:100%" class="fb blue"></div></div><b>100%</b></div>
+            <div class="funnel-row"><span>Открыто</span><div class="funnel-bar"><div style="width:47%" class="fb green"></div></div><b>47%</b></div>
+            <div class="funnel-row"><span>Переходы по ссылкам</span><div class="funnel-bar"><div style="width:19%" class="fb orange"></div></div><b>19%</b></div>
+            <div class="funnel-row"><span>Конверсии</span><div class="funnel-bar"><div style="width:8%" class="fb purple"></div></div><b>8%</b></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="campaign-modal">
+    <div class="modal">
+      <div class="modal-head"><h3>Новая рассылка</h3><button class="close" onclick="closeModal('campaign-modal')">✕</button></div>
+      <label>Название рассылки<input type="text" id="c-name" placeholder="Например: Скидка 20% до конца недели"></label>
+      <label>Сегмент
+        <select id="c-segment"><option>Все подписчики</option><option>Новые клиенты</option><option>Активные покупатели</option><option>Спящие клиенты</option><option>Корпоративные</option></select>
+      </label>
+      <label>Шаблон
+        <select id="c-template"><option>Промо-рассылка</option><option>Welcome-письмо</option><option>Абандонед корзины</option><option>Дайджест новостей</option><option>Transactional</option><option>Реактивация</option></select>
+      </label>
+      <button class="btn primary" style="width:100%" onclick="createCampaign()">Создать черновик</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="segment-modal">
+    <div class="modal">
+      <div class="modal-head"><h3>Новый сегмент</h3><button class="close" onclick="closeModal('segment-modal')">✕</button></div>
+      <label>Название<input type="text" id="s-name" placeholder="Например: Москва, 25–35 лет"></label>
+      <label>Описание<input type="text" id="s-desc" placeholder="Короткое описание"></label>
+      <button class="btn primary" style="width:100%" onclick="createSegment()">Создать сегмент</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
